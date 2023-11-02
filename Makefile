@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++20 -Wall
-INCLUDES = -I/usr/include/webkitgtk-4.0 -I Dependencies/ -I Dependencies/acl/lib_acl_cpp/include/ -I Dependencies/acl/lib_fiber/cpp/include/
-LDFLAGS = -ljavascriptcoregtk-4.0 -luv -lpthread -lstdc++fs -L/home/idorherz/Desktop/Development/Lisa/Dependencies/acl/build/lib/ -lacl_cpp -lacl -lfiber_cpp -lfiber -lprotocol -lz
+INCLUDES = -I/usr/include/webkitgtk-4.0 -I Dependencies/ 
+LDFLAGS = -ljavascriptcoregtk-4.0 -luv -lpthread -lstdc++fs 
 SOURCE_DIR = Source
 SOURCES := $(shell find $(SOURCE_DIR) -type f -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)

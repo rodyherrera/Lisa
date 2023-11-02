@@ -3,16 +3,14 @@
 #include <uv.h>
 #include "SetInterval.hpp"
 
-JSValueRef Lisa::Methods::SetInterval(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
-    if (ArgumentsLength < 2) {
-        std::cout << "SetInterval: Expected 2 arguments, got " << ArgumentsLength << std::endl;
+using namespace Lisa;
+
+JSValueRef Methods::SetInterval(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+    if(!JSValueIsObject(Context, Arguments[0])){
+        std::cout << "SetInterval: Expected argument 1 to be an object, got " << JSValueGetType(Context, Arguments[0]) << std::endl;
         return JSValueMakeUndefined(Context);
     }
-    if (!JSValueIsObject(Context, Arguments[0])) {
-        std::cout << "SetInterval: Expected argument 1 to be a function, got " << JSValueGetType(Context, Arguments[0]) << std::endl;
-        return JSValueMakeUndefined(Context);
-    }
-    if (!JSValueIsNumber(Context, Arguments[1])) {
+    if(!JSValueIsNumber(Context, Arguments[1])){
         std::cout << "SetInterval: Expected argument 2 to be a number, got " << JSValueGetType(Context, Arguments[1]) << std::endl;
         return JSValueMakeUndefined(Context);
     }

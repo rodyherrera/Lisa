@@ -3,7 +3,8 @@
 #include <uv.h>
 #include "Utilities/Runtime/Runtime.hpp"
 #include "Classes/Console/Console.hpp"
-#include "Classes/ACL/ACL.hpp"
+#include "Classes/EVPP/EVPP.hpp"
+#include "Classes/System/System.hpp"
 #include "Methods/SetTimeout/SetTimeout.hpp"
 #include "Methods/SetInterval/SetInterval.hpp"
 #include "Methods/ClearTimer/ClearTimer.hpp"
@@ -28,7 +29,8 @@ int main(int argc, char const *argv[]){
         JSObjectRef GlobalObject = JSContextGetGlobalObject(Context);
 
         Lisa::Classes::Console::Init(Context, GlobalObject);
-        Lisa::Classes::ACL::Init(Context, GlobalObject);
+        Lisa::Classes::EVPP::Init(Context, GlobalObject);
+        Lisa::Classes::System::Init(Context, GlobalObject);
 
         JSStringRef SetTimeoutName = JSStringCreateWithUTF8CString("SetTimeout");
         JSObjectRef SetTimeoutFunction = JSObjectMakeFunctionWithCallback(Context, SetTimeoutName, Lisa::Methods::SetTimeout);
