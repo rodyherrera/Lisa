@@ -3,7 +3,7 @@
 #include <uv.h>
 #include "SetTimeout.hpp"
 
-JSValueRef Lisa::Methods::SetInterval(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+JSValueRef Lisa::Methods::SetTimeout(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
     if (ArgumentsLength < 2) {
         std::cout << "SetInterval: Expected 2 arguments, got " << ArgumentsLength << std::endl;
         return JSValueMakeUndefined(Context);
