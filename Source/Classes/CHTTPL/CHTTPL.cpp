@@ -3,6 +3,7 @@
 #include "CHTTPL.hpp"
 #include "CPP-HTTP-LIB.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
+#include "../../Utilities/HTTPServer/HTTPServer.hpp"
 
 using namespace Lisa;
 using namespace Lisa::Utilities;
@@ -14,10 +15,7 @@ void Classes::CHTTPL::Init(JSContextRef Context, JSObjectRef GlobalObject){
 
 JSValueRef Classes::CHTTPL::CreateServer(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
     httplib::Server* Server = new httplib::Server();
-
-    Server->set_default_headers({
-        {"Server", "LisaJS"}
-    });
+    HTTPServer::SetDefaultHeaders(*Server);
 
     JSObjectRef ReturnValue = JSObjectMake(Context, NULL, NULL);
     JSCWrapper::SetObjectInObject(Context, ReturnValue, "Server", Server);
@@ -138,105 +136,67 @@ JSValueRef Classes::CHTTPL::CreateServer(JSContextRef Context, JSObjectRef Funct
         JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
         Server->Get(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
-            JSObjectRef ResponseObject = JSObjectMake(Context, NULL, NULL);
-            JSCWrapper::SetObjectInObject(Context, ResponseObject, "Response", &Response);
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
+        });
+        
+        return JSValueMakeUndefined(Context);
+    });
 
-            JSCWrapper::CreateFunction(Context, ResponseObject, "SetHeader", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
-                httplib::Response& Response = *(httplib::Response*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Response");
-                const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const std::string HeaderValue = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
-                Response.set_header(HeaderName.c_str(), HeaderValue.c_str());
-                return JSValueMakeUndefined(Context);
-            });
-            
-            JSCWrapper::CreateFunction(Context, ResponseObject, "SetRedirect", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
-                httplib::Response& Response = *(httplib::Response*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Response");
-                const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                Response.set_redirect(Path.c_str());
-                return JSValueMakeUndefined(Context);
-            });
+    JSCWrapper::CreateFunction(Context, ReturnValue, "Post", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
+        httplib::Server* Server = (httplib::Server*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Server");
+        std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+        JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
-            JSCWrapper::CreateFunction(Context, ResponseObject, "Send", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Response& Response = *(httplib::Response*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Response");
-                const std::string ResponseString = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const std::string ContentType = JSCWrapper::GetKeyValueFromJSObjectAsString(Context, ThisObject, "ContentType");
-                Response.set_content(ResponseString, ContentType.c_str());
-                return JSValueMakeUndefined(Context);
-            });
+        Server->Post(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
+        });
+        
+        return JSValueMakeUndefined(Context);
+    });
 
-            JSObjectRef RequestObject = JSObjectMake(Context, NULL, NULL);
-            httplib::Request* RequestCopy = new httplib::Request(Request);
-            JSCWrapper::SetObjectInObject(Context, RequestObject, "Request", RequestCopy);
-            
-            JSObjectRef HeadersObject = JSObjectMake(Context, NULL, NULL);
-            for(auto Header : Request.headers)
-                JSCWrapper::SetStringProperty(Context, HeadersObject, Header.first.c_str(), Header.second.c_str());
-            JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Headers"), HeadersObject, kJSPropertyAttributeNone, NULL);
+    JSCWrapper::CreateFunction(Context, ReturnValue, "Put", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
+        httplib::Server* Server = (httplib::Server*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Server");
+        std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+        JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
-            JSObjectRef ParamsObject = JSObjectMake(Context, NULL, NULL);
-            for(auto Param : Request.params)
-                JSCWrapper::SetStringProperty(Context, ParamsObject, Param.first.c_str(), Param.second.c_str());
-            JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Params"), ParamsObject, kJSPropertyAttributeNone, NULL);
+        Server->Put(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
+        });
+        
+        return JSValueMakeUndefined(Context);
+    });
 
-            JSCWrapper::SetStringProperty(Context, RequestObject, "Path", Request.path.c_str());
-            JSCWrapper::SetStringProperty(Context, RequestObject, "Method", Request.method.c_str());
-            JSCWrapper::SetStringProperty(Context, RequestObject, "Body", Request.body.c_str());
-            JSCWrapper::SetStringProperty(Context, RequestObject, "Version", Request.version.c_str());
-            JSCWrapper::SetStringProperty(Context, RequestObject, "Target", Request.target.c_str());
-            JSCWrapper::SetIntegerProperty(Context, RequestObject, "RemotePort", Request.remote_port);
-            JSCWrapper::SetStringProperty(Context, RequestObject, "RemoteAddress", Request.remote_addr.c_str());
+    JSCWrapper::CreateFunction(Context, ReturnValue, "Patch", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
+        httplib::Server* Server = (httplib::Server*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Server");
+        std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+        JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
-            JSCWrapper::CreateFunction(Context, RequestObject, "GetHeaderValue", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const std::string HeaderValue = Request.get_header_value(HeaderName.c_str());
-                return JSCWrapper::CreateString(Context, HeaderValue.c_str());
-            });
+        Server->Patch(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
+        });
+        
+        return JSValueMakeUndefined(Context);
+    });
 
-            JSCWrapper::CreateFunction(Context, RequestObject, "GetHeaderValueCount", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const int HeaderValueCount = Request.get_header_value_count(HeaderName.c_str());
-                return JSValueMakeNumber(Context, HeaderValueCount);
-            });
+    JSCWrapper::CreateFunction(Context, ReturnValue, "Delete", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
+        httplib::Server* Server = (httplib::Server*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Server");
+        std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+        JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
-            JSCWrapper::CreateFunction(Context, RequestObject, "GetParamValue", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string ParamName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const std::string ParamValue = Request.get_param_value(ParamName.c_str());
-                return JSCWrapper::CreateString(Context, ParamValue.c_str());
-            });
+        Server->Delete(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
+        });
+        
+        return JSValueMakeUndefined(Context);
+    });
 
-            JSCWrapper::CreateFunction(Context, RequestObject, "GetParamValueCount", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string ParamName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const int ParamValueCount = Request.get_param_value_count(ParamName.c_str());
-                return JSValueMakeNumber(Context, ParamValueCount);
-            });
+    JSCWrapper::CreateFunction(Context, ReturnValue, "Options", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
+        httplib::Server* Server = (httplib::Server*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Server");
+        std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+        JSObjectRef Callback = (JSObjectRef)Arguments[1];
 
-            JSCWrapper::CreateFunction(Context, RequestObject, "HasParam", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string ParamName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const bool HasParam = Request.has_param(ParamName.c_str());
-                return JSValueMakeBoolean(Context, HasParam);
-            });
-
-            JSCWrapper::CreateFunction(Context, RequestObject, "HasHeader", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const bool HasHeader = Request.has_header(HeaderName.c_str());
-                return JSValueMakeBoolean(Context, HasHeader);
-            });
-
-            JSCWrapper::CreateFunction(Context, RequestObject, "HasFile", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
-                httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
-                const std::string FileName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
-                const bool HasFile = Request.has_file(FileName.c_str());
-                return JSValueMakeBoolean(Context, HasFile);
-            });
-
-            JSValueRef CallbackArguments[2] = { RequestObject, ResponseObject };
-            JSCWrapper::CallFunction(Context, Callback, ThisObject, 2, CallbackArguments);
+        Server->Options(Path, [Context, ThisObject, Arguments, Callback](const httplib::Request& Request, httplib::Response& Response){
+            HTTPServer::HandleHTTPRequest(Context, ThisObject, const_cast<httplib::Request&>(Request), Response, Callback);
         });
         
         return JSValueMakeUndefined(Context);

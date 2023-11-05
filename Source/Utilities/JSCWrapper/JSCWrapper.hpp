@@ -1,5 +1,3 @@
-#ifndef UTILITIES_JSCWRAPPER_HPP
-#define UTILITIES_JSCWRAPPER_HPP
 #include <JavaScriptCore/JavaScript.h>
 
 namespace Lisa::Utilities::JSCWrapper{
@@ -21,5 +19,3 @@ namespace Lisa::Utilities::JSCWrapper{
     void CallFunction(JSContextRef Context, JSValueRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[]);
     const std::string GetStringFromJSString(JSStringRef String);
 };
-
-#endif
