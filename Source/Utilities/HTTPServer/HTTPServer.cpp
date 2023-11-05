@@ -19,10 +19,15 @@ JSObjectRef HTTPServer::CreateRequestObject(JSContextRef Context, httplib::Reque
         JSCWrapper::SetStringProperty(Context, HeadersObject, Header.first.c_str(), Header.second.c_str());
     JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Headers"), HeadersObject, kJSPropertyAttributeNone, NULL);
 
-    JSObjectRef ParamsObject = JSObjectMake(Context, NULL, NULL);
-    for(auto Param : Request->params)
-        JSCWrapper::SetStringProperty(Context, ParamsObject, Param.first.c_str(), Param.second.c_str());
-    JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Params"), ParamsObject, kJSPropertyAttributeNone, NULL);
+    JSObjectRef PathParamsObject = JSObjectMake(Context, NULL, NULL);
+    for(auto PathParam : Request->path_params)
+        JSCWrapper::SetStringProperty(Context, PathParamsObject, PathParam.first.c_str(), PathParam.second.c_str());
+    JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("PathParams"), PathParamsObject, kJSPropertyAttributeNone, NULL);
+
+    JSObjectRef QueryParamsObject = JSObjectMake(Context, NULL, NULL);
+    for(auto QueryParam : Request->params)
+        JSCWrapper::SetStringProperty(Context, QueryParamsObject, QueryParam.first.c_str(), QueryParam.second.c_str());
+    JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Query"), QueryParamsObject, kJSPropertyAttributeNone, NULL);
 
     JSCWrapper::SetStringProperty(Context, RequestObject, "Path", Request->path.c_str());
     JSCWrapper::SetStringProperty(Context, RequestObject, "Method", Request->method.c_str());

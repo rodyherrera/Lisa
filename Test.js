@@ -5,8 +5,11 @@ const Options = {
 
 const Application = CHTTPL.CreateServer();
 
-Application.Get('/', (Request, Response) => {
-    Response.Send('Hello World!', 'text/html', 500);
+Application.Get('/u/:username', (Request, Response) => {
+    Response.Send(JSON.stringify({
+        Status: 200,
+        Message: 'Hello World!'
+    }), 'application/json', 200);
 });
 
 Application.Listen(Options, () => {
