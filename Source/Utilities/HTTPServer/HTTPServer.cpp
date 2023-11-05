@@ -1,6 +1,7 @@
 #include <iostream>
 #include "CPP-HTTP-LIB.hpp"
 #include "HTTPServer.hpp"
+#include "../Runtime/Runtime.hpp"
 #include "../JSCWrapper/JSCWrapper.hpp"
 
 using namespace Lisa;
@@ -130,21 +131,21 @@ JSObjectRef HTTPServer::CreateResponseObject(JSContextRef Context, httplib::Resp
         const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
         const std::string HeaderValue = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
         Response.set_header(HeaderName.c_str(), HeaderValue.c_str());
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     });
     
     JSCWrapper::CreateFunction(Context, ResponseObject, "SetRedirect", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
         httplib::Response& Response = *(httplib::Response*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Response");
         const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
         Response.set_redirect(Path.c_str());
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     });
 
     JSCWrapper::CreateFunction(Context, ResponseObject, "SetStatus", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
         httplib::Response& Response = *(httplib::Response*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Response");
         const int Status = JSValueToNumber(Context, Arguments[0], NULL);
         Response.status = Status;
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     });
 
     JSCWrapper::CreateFunction(Context, ResponseObject, "Send", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
@@ -154,7 +155,7 @@ JSObjectRef HTTPServer::CreateResponseObject(JSContextRef Context, httplib::Resp
         const int Status = JSValueToNumber(Context, Arguments[2], NULL);
         Response.status = Status;
         Response.set_content(ResponseString, ContentType.c_str());
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     });
 
     return ResponseObject;

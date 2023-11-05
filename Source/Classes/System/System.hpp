@@ -7,23 +7,23 @@ namespace Lisa::Classes{
     class System{
         public:
             static void Init(JSContextRef Context, JSObjectRef GlobalObject);
-            LISA_JS_FUNC_DEF(HRTime);
-            LISA_JS_FUNC_DEF(Uptime);
-            LISA_JS_FUNC_DEF(Uname);
-            LISA_JS_FUNC_DEF(Environ);
-            LISA_JS_FUNC_DEF(GetEnviron);
-            LISA_JS_FUNC_DEF(SetEnviron);
-            LISA_JS_FUNC_DEF(UnsetEnviron);
-            LISA_JS_FUNC_DEF(ChangeWorkingDirectory);
-            LISA_JS_FUNC_DEF(CurrentWorkingDirectory);
-            LISA_JS_FUNC_DEF(HomeDirectory);
-            LISA_JS_FUNC_DEF(TempDirectory);
-            LISA_JS_FUNC_DEF(CPUInfo);
-            LISA_JS_FUNC_DEF(NetworkInterfaces);
-            LISA_JS_FUNC_DEF(GetHostname);
-            LISA_JS_FUNC_DEF(GetPID);
-            LISA_JS_FUNC_DEF(GetPPID);
-            LISA_JS_FUNC_DEF(Sleep);
+            JSC_FUNC_DEF(HRTime);
+            JSC_FUNC_DEF(Uptime);
+            JSC_FUNC_DEF(Uname);
+            JSC_FUNC_DEF(Environ);
+            JSC_FUNC_DEF(GetEnviron);
+            JSC_FUNC_DEF(SetEnviron);
+            JSC_FUNC_DEF(UnsetEnviron);
+            JSC_FUNC_DEF(ChangeWorkingDirectory);
+            JSC_FUNC_DEF(CurrentWorkingDirectory);
+            JSC_FUNC_DEF(HomeDirectory);
+            JSC_FUNC_DEF(TempDirectory);
+            JSC_FUNC_DEF(CPUInfo);
+            JSC_FUNC_DEF(NetworkInterfaces);
+            JSC_FUNC_DEF(GetHostname);
+            JSC_FUNC_DEF(GetPID);
+            JSC_FUNC_DEF(GetPPID);
+            JSC_FUNC_DEF(Sleep);
     };
 };
 

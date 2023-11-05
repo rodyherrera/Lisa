@@ -7,7 +7,7 @@ namespace Lisa::Classes{
     class Console{
         public:
             static void Init(JSContextRef Context, JSObjectRef GlobalObject);
-            static LISA_JS_FUNC_DEF(Log);
+            JSC_FUNC_DEF(Log);
     };
 };
 

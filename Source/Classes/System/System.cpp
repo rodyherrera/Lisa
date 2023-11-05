@@ -28,18 +28,18 @@ void Classes::System::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, SystemObject, "GetPPID", System::GetPPID);
 };
 
-LISA_JS_FUNC(Classes::System, HRTime){
+JSC_FUNC(Classes::System, HRTime){
     uint64_t Time = uv_hrtime();
     return JSValueMakeNumber(Context, Time);
 };
 
-LISA_JS_FUNC(Classes::System, Uptime){
+JSC_FUNC(Classes::System, Uptime){
     double Uptime;
     uv_uptime(&Uptime);
     return JSValueMakeNumber(Context, Uptime);
 };
 
-LISA_JS_FUNC(Classes::System, Uname){
+JSC_FUNC(Classes::System, Uname){
     uv_utsname_t Uname;
     uv_os_uname(&Uname);
     JSObjectRef UnameObject = JSCWrapper::CreateObject(Context, JSObjectMake(Context, nullptr, nullptr), "Uname");
@@ -50,12 +50,12 @@ LISA_JS_FUNC(Classes::System, Uname){
     return UnameObject;
 };
 
-LISA_JS_FUNC(Classes::System, Environ){
+JSC_FUNC(Classes::System, Environ){
     uv_env_item_t *Environ;
     int EnvironmentVariableCount;
     int Result = uv_os_environ(&Environ, &EnvironmentVariableCount);
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     JSObjectRef EnvironObject = JSCWrapper::CreateObject(Context, JSObjectMake(Context, nullptr, nullptr), "Environ");
     for(int EnvironmentVariableIterator = 0; EnvironmentVariableIterator < EnvironmentVariableCount; EnvironmentVariableIterator++){
@@ -64,53 +64,53 @@ LISA_JS_FUNC(Classes::System, Environ){
     return EnvironObject;
 };
 
-LISA_JS_FUNC(Classes::System, GetEnviron){
+JSC_FUNC(Classes::System, GetEnviron){
     if(ArgumentsLength < 1){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     const std::string Name = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     char* Value = getenv(Name.c_str());
     if(Value == nullptr){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     return JSValueMakeString(Context, JSStringCreateWithUTF8CString(Value));
 };
 
-LISA_JS_FUNC(Classes::System, SetEnviron){
+JSC_FUNC(Classes::System, SetEnviron){
     if(ArgumentsLength < 2){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     const std::string Name = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     const std::string Value = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
     int Result = setenv(Name.c_str(), Value.c_str(), 1);
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     return JSValueMakeBoolean(Context, true);
 };
 
-LISA_JS_FUNC(Classes::System, UnsetEnviron){
+JSC_FUNC(Classes::System, UnsetEnviron){
     if(ArgumentsLength < 1){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     const std::string Name = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     int Result = unsetenv(Name.c_str());
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     return JSValueMakeBoolean(Context, true);
 };
 
-LISA_JS_FUNC(Classes::System, ChangeWorkingDirectory){
+JSC_FUNC(Classes::System, ChangeWorkingDirectory){
     if(ArgumentsLength < 1){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     const std::string Directory = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     int Result = chdir(Directory.c_str());
     return JSValueMakeBoolean(Context, Result == 0);
 };
 
-LISA_JS_FUNC(Classes::System, CurrentWorkingDirectory){
+JSC_FUNC(Classes::System, CurrentWorkingDirectory){
     char* CurrentWorkingDirectory = getcwd(nullptr, 0);
     JSStringRef CurrentWorkingDirectoryString = JSStringCreateWithUTF8CString(CurrentWorkingDirectory);
     JSValueRef CurrentWorkingDirectoryJSString = JSValueMakeString(Context, CurrentWorkingDirectoryString);
@@ -118,26 +118,26 @@ LISA_JS_FUNC(Classes::System, CurrentWorkingDirectory){
     return CurrentWorkingDirectoryJSString;
 };
 
-LISA_JS_FUNC(Classes::System, HomeDirectory){
+JSC_FUNC(Classes::System, HomeDirectory){
     char* HomeDirectory = getenv("HOME");
     JSStringRef HomeDirectoryString = JSStringCreateWithUTF8CString(HomeDirectory);
     JSValueRef HomeDirectoryJSString = JSValueMakeString(Context, HomeDirectoryString);
     return HomeDirectoryJSString;
 };
 
-LISA_JS_FUNC(Classes::System, TempDirectory){
+JSC_FUNC(Classes::System, TempDirectory){
     char* TempDirectory = getenv("TMPDIR");
     JSStringRef TempDirectoryString = JSStringCreateWithUTF8CString(TempDirectory);
     JSValueRef TempDirectoryJSString = JSValueMakeString(Context, TempDirectoryString);
     return TempDirectoryJSString;
 };
 
-LISA_JS_FUNC(Classes::System, CPUInfo){
+JSC_FUNC(Classes::System, CPUInfo){
     uv_cpu_info_t *CPUInformation;
     int CPUInformationCount;
     int Result = uv_cpu_info(&CPUInformation, &CPUInformationCount);
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     JSObjectRef CPUInformationArray = JSObjectMakeArray(Context, 0, nullptr, nullptr);
     for(int Iterator = 0; Iterator < CPUInformationCount; Iterator++){
@@ -157,12 +157,12 @@ LISA_JS_FUNC(Classes::System, CPUInfo){
     return CPUInformationArray;
 };
 
-LISA_JS_FUNC(Classes::System, NetworkInterfaces){
+JSC_FUNC(Classes::System, NetworkInterfaces){
     uv_interface_address_t* Interfaces;
     int InterfaceCount;
     int Result = uv_interface_addresses(&Interfaces, &InterfaceCount);
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     JSObjectRef InterfaceArray = JSObjectMakeArray(Context, 0, nullptr, nullptr);
     for(int Iterator = 0; Iterator < InterfaceCount; Iterator++){
@@ -188,30 +188,30 @@ LISA_JS_FUNC(Classes::System, NetworkInterfaces){
     return InterfaceArray;
 };
 
-LISA_JS_FUNC(Classes::System, GetHostname){
+JSC_FUNC(Classes::System, GetHostname){
     char Hostname[256];
     int Result = gethostname(Hostname, sizeof(Hostname));
     if(Result != 0){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     JSStringRef HostnameString = JSStringCreateWithUTF8CString(Hostname);
     JSValueRef HostnameJSString = JSValueMakeString(Context, HostnameString);
     return HostnameJSString;
 };
 
-LISA_JS_FUNC(Classes::System, GetPID){
+JSC_FUNC(Classes::System, GetPID){
     return JSValueMakeNumber(Context, getpid());
 };
 
-LISA_JS_FUNC(Classes::System, GetPPID){
+JSC_FUNC(Classes::System, GetPPID){
     return JSValueMakeNumber(Context, getppid());
 };
 
-LISA_JS_FUNC(Classes::System, Sleep){
+JSC_FUNC(Classes::System, Sleep){
     if(ArgumentsLength < 1){
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     const int Milliseconds = JSCWrapper::GetKeyValueFromJSObjectAsInteger(Context, ThisObject, "Milliseconds");
     uv_sleep(Milliseconds);
-    return JSValueMakeUndefined(Context);
+    return JSC_MAKE_UNDEFINED;
 };

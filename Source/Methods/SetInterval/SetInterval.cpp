@@ -6,14 +6,14 @@
 
 using namespace Lisa;
 
-LISA_JS_FUNC(Methods, SetInterval){
+JSC_FUNC(Methods, SetInterval){
     if(!JSValueIsObject(Context, Arguments[0])){
         std::cout << "SetInterval: Expected argument 1 to be an object, got " << JSValueGetType(Context, Arguments[0]) << std::endl;
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     if(!JSValueIsNumber(Context, Arguments[1])){
         std::cout << "SetInterval: Expected argument 2 to be a number, got " << JSValueGetType(Context, Arguments[1]) << std::endl;
-        return JSValueMakeUndefined(Context);
+        return JSC_MAKE_UNDEFINED;
     }
     JSObjectRef FunctionObject = JSValueToObject(Context, Arguments[0], NULL);
     JSGlobalContextRef JSGlobalContext = JSContextGetGlobalContext(Context);

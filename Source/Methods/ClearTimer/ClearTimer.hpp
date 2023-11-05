@@ -3,5 +3,5 @@
 #include <JavaScriptCore/JavaScript.h>
 
 namespace Lisa::Methods{
-    LISA_JS_FUNC_DEF(ClearTimer);
+    JSC_FUNC_NON_STATIC_DEF(ClearTimer);
 };

@@ -7,7 +7,7 @@ namespace Lisa::Classes{
     class CHTTPL{
         public:
             static void Init(JSContextRef Context, JSObjectRef GlobalObject);
-            static LISA_JS_FUNC_DEF(CreateServer);
+            JSC_FUNC_DEF(CreateServer);
     };
 };
 

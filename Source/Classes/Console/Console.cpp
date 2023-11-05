@@ -11,7 +11,7 @@ void Classes::Console::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, ConsoleObject, "Log", Console::Log);
 };
 
-LISA_JS_FUNC(Classes::Console, Log){
+JSC_FUNC(Classes::Console, Log){
     for(size_t ArgumentIterator = 0; ArgumentIterator < ArgumentsLength; ArgumentIterator++){
         if(JSValueIsObject(Context, Arguments[ArgumentIterator])){
             const std::string JSON = JSCWrapper::GetFormattedJSONFromJSValue(Context, Arguments[ArgumentIterator]);
@@ -23,5 +23,5 @@ LISA_JS_FUNC(Classes::Console, Log){
         (ArgumentIterator != (ArgumentsLength - 1)) && (std::cout << " ");
     }
     std::cout << std::endl;
-    return JSValueMakeUndefined(Context);
+    return JSC_MAKE_UNDEFINED;
 };
