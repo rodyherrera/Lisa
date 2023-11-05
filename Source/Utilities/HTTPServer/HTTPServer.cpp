@@ -79,12 +79,6 @@ JSObjectRef HTTPServer::CreateRequestObject(JSContextRef Context, httplib::Reque
     JSCWrapper::SetIntegerProperty(Context, RequestObject, "RemotePort", Request->remote_port);
     JSCWrapper::SetStringProperty(Context, RequestObject, "RemoteAddress", Request->remote_addr.c_str());
 
-    std::vector<std::string> Matches;
-    for(auto Match : Request->matches)
-        Matches.push_back(Match);
-    JSObjectRef MatchesObject = JSObjectMakeArray(Context, Matches.size(), NULL, NULL);
-    JSObjectSetProperty(Context, RequestObject, JSStringCreateWithUTF8CString("Matches"), MatchesObject, kJSPropertyAttributeNone, NULL);
-
     JSCWrapper::CreateFunction(Context, RequestObject, "GetHeaderValue", [](JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) -> JSValueRef {
         httplib::Request& Request = *(httplib::Request*)JSCWrapper::GetObjectFromObject(Context, ThisObject, "Request");
         const std::string HeaderName = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);

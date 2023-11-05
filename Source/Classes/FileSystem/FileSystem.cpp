@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 #include "FileSystem.hpp"
 #include "../../Utilities/Runtime/Runtime.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
@@ -11,6 +12,7 @@ void Classes::FileSystem::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSObjectRef FileSystemObject = JSCWrapper::CreateObject(Context, GlobalObject, "FileSystem");
     JSCWrapper::CreateFunction(Context, FileSystemObject, "AbsolutePath", FileSystem::AbsolutePath);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CanonicalPath", FileSystem::CanonicalPath);
+    JSCWrapper::CreateFunction(Context, FileSystemObject, "ReadLines", FileSystem::ReadLines);  
     JSCWrapper::CreateFunction(Context, FileSystemObject, "RelativePath", FileSystem::RelativePath);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "Copy", FileSystem::Copy);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CopyFileContent", FileSystem::CopyFileContent);
@@ -20,9 +22,11 @@ void Classes::FileSystem::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CreateHardLink", FileSystem::CreateHardLink);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CreateSymlink", FileSystem::CreateSymlink);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CreateDirectorySymlink", FileSystem::CreateDirectorySymlink);
+    JSCWrapper::CreateFunction(Context, FileSystemObject, "WriteFile", FileSystem::WriteFile);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "CurrentPath", FileSystem::CurrentPath);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "Exists", FileSystem::Exists);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "Equivalent", FileSystem::Equivalent);
+    JSCWrapper::CreateFunction(Context, FileSystemObject, "ReadFile", FileSystem::ReadFile);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "FileSize", FileSystem::FileSize);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "HardLinkCount", FileSystem::HardLinkCount);
     JSCWrapper::CreateFunction(Context, FileSystemObject, "GetLastWriteTime", FileSystem::GetLastWriteTime);
@@ -267,4 +271,55 @@ JSC_FUNC(Classes::FileSystem, IsSymlink){
     const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     const bool Status = std::filesystem::is_symlink(Path);
     return JSValueMakeBoolean(Context, Status);
+}
+
+JSC_FUNC(Classes::FileSystem, ReadFile){
+    const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+    std::ifstream File(Path, std::ios::ate);
+    if(!File.is_open()){
+        return JSValueMakeBoolean(Context, false);
+    }
+    const std::streamsize FileSize = File.tellg();
+    File.seekg(0, std::ios::beg);
+    std::string Content;
+    Content.resize(FileSize);
+    File.read(&Content[0], FileSize);
+    File.close();
+    return JSCWrapper::CreateString(Context, Content.data());
+};
+
+JSC_FUNC(Classes::FileSystem, ReadLines){
+    const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+    std::ifstream File(Path);
+    if(!File.is_open()){
+        return JSValueMakeBoolean(Context, false);
+    }
+    JSObjectRef Array = JSObjectMakeArray(Context, 0, NULL, NULL);
+    std::string Line;
+    int Index = 0;
+    while(std::getline(File, Line)){
+        JSStringRef LineString = JSStringCreateWithUTF8CString(Line.c_str());
+        JSObjectSetPropertyAtIndex(Context, Array, Index, JSValueMakeString(Context, LineString), NULL);
+        JSStringRelease(LineString);
+        Index++;
+    }
+    File.close();
+    return Array;
+}
+
+JSC_FUNC(Classes::FileSystem, WriteFile) {
+    const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+    const std::string Content = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
+    std::ofstream File(Path, std::ios::trunc);
+    if(!File.is_open()){
+        return JSValueMakeBoolean(Context, false);
+    }
+    File << Content;
+    if(File.good()){
+        File.close();
+        return JSValueMakeBoolean(Context, true);
+    }else{
+        File.close();
+        return JSValueMakeBoolean(Context, false);
+    }
 }

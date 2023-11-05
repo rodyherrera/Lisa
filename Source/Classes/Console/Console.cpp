@@ -23,5 +23,5 @@ JSC_FUNC(Classes::Console, Log){
         (ArgumentIterator != (ArgumentsLength - 1)) && (std::cout << " ");
     }
     std::cout << std::endl;
-    return JSC_MAKE_UNDEFINED;
+    return JSValueMakeUndefined(Context);
 };

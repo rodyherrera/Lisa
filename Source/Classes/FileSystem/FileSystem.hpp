@@ -18,6 +18,8 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(CreateHardLink);
             JSC_FUNC_DEF(CreateSymlink);
             JSC_FUNC_DEF(CreateDirectorySymlink);
+            JSC_FUNC_DEF(WriteFile);
+            JSC_FUNC_DEF(ReadLines);
             JSC_FUNC_DEF(CurrentPath);
             JSC_FUNC_DEF(Exists);
             JSC_FUNC_DEF(Equivalent);
@@ -43,7 +45,7 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(IsRegularFile);
             JSC_FUNC_DEF(IsSocket);
             JSC_FUNC_DEF(IsSymlink);
-
+            JSC_FUNC_DEF(ReadFile);
     };
 };
 
