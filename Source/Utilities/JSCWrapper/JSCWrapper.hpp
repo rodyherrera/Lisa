@@ -18,4 +18,5 @@ namespace Lisa::Utilities::JSCWrapper{
     void* GetObjectFromObject(JSContextRef Context, JSObjectRef ParentObject, const char* PropertyName);
     void CallFunction(JSContextRef Context, JSValueRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[]);
     const std::string GetStringFromJSString(JSStringRef String);
+    const double GetNumberFromJSValue(JSContextRef Context, JSValueRef Value);
 };

@@ -5,6 +5,7 @@
 #include "Classes/Console/Console.hpp"
 #include "Classes/System/System.hpp"
 #include "Classes/CHTTPL/CHTTPL.hpp"
+#include "Classes/FileSystem/FileSystem.hpp"
 #include "Methods/SetTimeout/SetTimeout.hpp"
 #include "Methods/SetInterval/SetInterval.hpp"
 #include "Methods/ClearTimer/ClearTimer.hpp"
@@ -31,6 +32,7 @@ int main(int argc, char const *argv[]){
         Lisa::Classes::Console::Init(Context, GlobalObject);
         Lisa::Classes::System::Init(Context, GlobalObject);
         Lisa::Classes::CHTTPL::Init(Context, GlobalObject);
+        Lisa::Classes::FileSystem::Init(Context, GlobalObject);
 
         JSStringRef SetTimeoutName = JSStringCreateWithUTF8CString("SetTimeout");
         JSObjectRef SetTimeoutFunction = JSObjectMakeFunctionWithCallback(Context, SetTimeoutName, Lisa::Methods::SetTimeout);

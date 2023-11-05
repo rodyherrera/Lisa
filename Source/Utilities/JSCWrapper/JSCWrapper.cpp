@@ -13,6 +13,10 @@ const std::string Lisa::Utilities::JSCWrapper::GetFormattedJSONFromJSValue(JSCon
     return FormattedJSONString;
 };
 
+const double Lisa::Utilities::JSCWrapper::GetNumberFromJSValue(JSContextRef Context, JSValueRef Value){
+    return JSValueToNumber(Context, Value, NULL);
+};
+
 const std::string Lisa::Utilities::JSCWrapper::GetStringFromJSString(JSStringRef String){
     size_t StringLength = JSStringGetMaximumUTF8CStringSize(String);
     char StringBuffer[StringLength];
