@@ -14,6 +14,12 @@ namespace Lisa::Utilities::JSCWrapper{
     const std::string GetFormattedJSONFromJSValue(JSContextRef Context, JSValueRef Value);
     void SetStringProperty(JSContextRef Context, JSObjectRef Object, const char* Key, const char* Value);
     void SetIntegerProperty(JSContextRef Context, JSObjectRef Object, const char* Key, const int Value);
+    JSValueRef CreateString(JSContextRef Context, const char* String);
+    JSObjectRef GetKeyValueFromJSObjectAsFunction(JSContextRef Context, JSObjectRef Object, const char* Key);
+    void SetObjectInObject(JSContextRef Context, JSObjectRef ParentObject, const char* PropertyName, void* ChildObject);
+    void* GetObjectFromObject(JSContextRef Context, JSObjectRef ParentObject, const char* PropertyName);
+    void CallFunction(JSContextRef Context, JSValueRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[]);
+    const std::string GetStringFromJSString(JSStringRef String);
 };
 
 #endif

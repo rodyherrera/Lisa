@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "JSCWrapper.hpp"
 
 const std::string Lisa::Utilities::JSCWrapper::GetFormattedJSONFromJSValue(JSContextRef Context, JSValueRef Value){
@@ -10,6 +11,27 @@ const std::string Lisa::Utilities::JSCWrapper::GetFormattedJSONFromJSValue(JSCon
     delete[] JSONStringBuffer;
     JSStringRelease(JSONString);
     return FormattedJSONString;
+};
+
+const std::string Lisa::Utilities::JSCWrapper::GetStringFromJSString(JSStringRef String){
+    size_t StringLength = JSStringGetMaximumUTF8CStringSize(String);
+    char StringBuffer[StringLength];
+    JSStringGetUTF8CString(String, StringBuffer, StringLength);
+    return std::string(StringBuffer);
+};
+
+JSValueRef Lisa::Utilities::JSCWrapper::CreateString(JSContextRef Context, const char* String){
+    JSStringRef StringRef = JSStringCreateWithUTF8CString(String);
+    JSValueRef Value = JSValueMakeString(Context, StringRef);
+    JSStringRelease(StringRef);
+    return Value;
+};
+
+JSObjectRef Lisa::Utilities::JSCWrapper::GetKeyValueFromJSObjectAsFunction(JSContextRef Context, JSObjectRef Object, const char* Key){
+    JSStringRef KeyString = JSStringCreateWithUTF8CString(Key);
+    JSValueRef Value = JSObjectGetProperty(Context, Object, KeyString, NULL);
+    JSStringRelease(KeyString);
+    return JSValueToObject(Context, Value, NULL);
 };
 
 void Lisa::Utilities::JSCWrapper::SetStringProperty(JSContextRef Context, JSObjectRef Object, const char* Key, const char* Value){
@@ -55,6 +77,27 @@ const std::string Lisa::Utilities::JSCWrapper::GetStringFromJSValue(JSContextRef
     JSStringRelease(StringRef);
     return std::string(String);
 };
+
+void Lisa::Utilities::JSCWrapper::CallFunction(JSContextRef Context, JSValueRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[]){
+    JSObjectCallAsFunction(Context, (JSObjectRef)Function, ThisObject, ArgumentsLength, Arguments, NULL);
+};
+
+void Lisa::Utilities::JSCWrapper::SetObjectInObject(JSContextRef Context, JSObjectRef ParentObject, const char* PropertyName, void* ChildObject) {
+    JSStringRef JSPropertyName = JSStringCreateWithUTF8CString(PropertyName);
+    JSClassDefinition Definition = kJSClassDefinitionEmpty;
+    JSClassRef Class = JSClassCreate(&Definition);
+    JSObjectRef JSChildObject = JSObjectMake(Context, Class, ChildObject);
+    JSObjectSetProperty(Context, ParentObject, JSPropertyName, JSChildObject, kJSPropertyAttributeNone, NULL);
+    JSStringRelease(JSPropertyName);
+}
+
+void* Lisa::Utilities::JSCWrapper::GetObjectFromObject(JSContextRef Context, JSObjectRef ParentObject, const char* PropertyName) {
+    JSStringRef JSPropertyName = JSStringCreateWithUTF8CString(PropertyName);
+    JSValueRef ChildValue = JSObjectGetProperty(Context, ParentObject, JSPropertyName, NULL);
+    JSStringRelease(JSPropertyName);
+    JSObjectRef ChildObject = JSValueToObject(Context, ChildValue, NULL);
+    return JSObjectGetPrivate(ChildObject);
+}
 
 JSObjectRef Lisa::Utilities::JSCWrapper::CreateObject(JSContextRef Context, JSObjectRef GlobalObject, const char* ObjectName){
     JSClassDefinition ClassDefinition = kJSClassDefinitionEmpty;
