@@ -1,31 +1,29 @@
 #ifndef LISA_CLASSES_SYSTEM_HPP
 #define LISA_CLASSES_SYSTEM_HPP
+#include "../../Utilities/Runtime/Runtime.hpp"
 #include <JavaScriptCore/JavaScript.h>
 
 namespace Lisa::Classes{
     class System{
         public:
             static void Init(JSContextRef Context, JSObjectRef GlobalObject);
-            static JSValueRef HRTime(JSContextRef Context, JSObjectRef Function, 
-                JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef Uptime(JSContextRef Context, JSObjectRef Function,
-                JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef Uname(JSContextRef Context, JSObjectRef Function,
-                JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef Environ(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef GetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef SetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef UnsetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef ChangeWorkingDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef CurrentWorkingDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef HomeDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef TempDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef CPUInfo(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef NetworkInterfaces(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef GetHostname(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef GetPID(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef GetPPID(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
-            static JSValueRef Sleep(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
+            LISA_JS_FUNC_DEF(HRTime);
+            LISA_JS_FUNC_DEF(Uptime);
+            LISA_JS_FUNC_DEF(Uname);
+            LISA_JS_FUNC_DEF(Environ);
+            LISA_JS_FUNC_DEF(GetEnviron);
+            LISA_JS_FUNC_DEF(SetEnviron);
+            LISA_JS_FUNC_DEF(UnsetEnviron);
+            LISA_JS_FUNC_DEF(ChangeWorkingDirectory);
+            LISA_JS_FUNC_DEF(CurrentWorkingDirectory);
+            LISA_JS_FUNC_DEF(HomeDirectory);
+            LISA_JS_FUNC_DEF(TempDirectory);
+            LISA_JS_FUNC_DEF(CPUInfo);
+            LISA_JS_FUNC_DEF(NetworkInterfaces);
+            LISA_JS_FUNC_DEF(GetHostname);
+            LISA_JS_FUNC_DEF(GetPID);
+            LISA_JS_FUNC_DEF(GetPPID);
+            LISA_JS_FUNC_DEF(Sleep);
     };
 };
 

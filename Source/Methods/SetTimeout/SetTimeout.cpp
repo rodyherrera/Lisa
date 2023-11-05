@@ -1,11 +1,12 @@
 #include <iostream>
 #include <JavaScriptCore/JavaScript.h>
 #include <uv.h>
+#include "../../Utilities/Runtime/Runtime.hpp"
 #include "SetTimeout.hpp"
 
 using namespace Lisa;
 
-JSValueRef Methods::SetTimeout(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Methods, SetTimeout){
     if(!JSValueIsObject(Context, Arguments[0])){
         std::cout << "SetTimeout: Expected argument 1 to be an object, got " << JSValueGetType(Context, Arguments[0]) << std::endl;
         return JSValueMakeUndefined(Context);

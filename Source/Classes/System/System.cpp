@@ -1,6 +1,7 @@
 #include <iostream>
 #include <uv.h>
 #include "System.hpp"
+#include "../../Utilities/Runtime/Runtime.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
 
 using namespace Lisa;
@@ -27,18 +28,18 @@ void Classes::System::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, SystemObject, "GetPPID", System::GetPPID);
 };
 
-JSValueRef Classes::System::HRTime(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, HRTime){
     uint64_t Time = uv_hrtime();
     return JSValueMakeNumber(Context, Time);
 };
 
-JSValueRef Classes::System::Uptime(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, Uptime){
     double Uptime;
     uv_uptime(&Uptime);
     return JSValueMakeNumber(Context, Uptime);
 };
 
-JSValueRef Classes::System::Uname(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, Uname){
     uv_utsname_t Uname;
     uv_os_uname(&Uname);
     JSObjectRef UnameObject = JSCWrapper::CreateObject(Context, JSObjectMake(Context, nullptr, nullptr), "Uname");
@@ -49,7 +50,7 @@ JSValueRef Classes::System::Uname(JSContextRef Context, JSObjectRef Function, JS
     return UnameObject;
 };
 
-JSValueRef Classes::System::Environ(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, Environ){
     uv_env_item_t *Environ;
     int EnvironmentVariableCount;
     int Result = uv_os_environ(&Environ, &EnvironmentVariableCount);
@@ -63,7 +64,7 @@ JSValueRef Classes::System::Environ(JSContextRef Context, JSObjectRef Function, 
     return EnvironObject;
 };
 
-JSValueRef Classes::System::GetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, GetEnviron){
     if(ArgumentsLength < 1){
         return JSValueMakeUndefined(Context);
     }
@@ -75,7 +76,7 @@ JSValueRef Classes::System::GetEnviron(JSContextRef Context, JSObjectRef Functio
     return JSValueMakeString(Context, JSStringCreateWithUTF8CString(Value));
 };
 
-JSValueRef Classes::System::SetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, SetEnviron){
     if(ArgumentsLength < 2){
         return JSValueMakeUndefined(Context);
     }
@@ -88,7 +89,7 @@ JSValueRef Classes::System::SetEnviron(JSContextRef Context, JSObjectRef Functio
     return JSValueMakeBoolean(Context, true);
 };
 
-JSValueRef Classes::System::UnsetEnviron(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, UnsetEnviron){
     if(ArgumentsLength < 1){
         return JSValueMakeUndefined(Context);
     }
@@ -100,7 +101,7 @@ JSValueRef Classes::System::UnsetEnviron(JSContextRef Context, JSObjectRef Funct
     return JSValueMakeBoolean(Context, true);
 };
 
-JSValueRef Classes::System::ChangeWorkingDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, ChangeWorkingDirectory){
     if(ArgumentsLength < 1){
         return JSValueMakeUndefined(Context);
     }
@@ -109,7 +110,7 @@ JSValueRef Classes::System::ChangeWorkingDirectory(JSContextRef Context, JSObjec
     return JSValueMakeBoolean(Context, Result == 0);
 };
 
-JSValueRef Classes::System::CurrentWorkingDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, CurrentWorkingDirectory){
     char* CurrentWorkingDirectory = getcwd(nullptr, 0);
     JSStringRef CurrentWorkingDirectoryString = JSStringCreateWithUTF8CString(CurrentWorkingDirectory);
     JSValueRef CurrentWorkingDirectoryJSString = JSValueMakeString(Context, CurrentWorkingDirectoryString);
@@ -117,21 +118,21 @@ JSValueRef Classes::System::CurrentWorkingDirectory(JSContextRef Context, JSObje
     return CurrentWorkingDirectoryJSString;
 };
 
-JSValueRef Classes::System::HomeDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, HomeDirectory){
     char* HomeDirectory = getenv("HOME");
     JSStringRef HomeDirectoryString = JSStringCreateWithUTF8CString(HomeDirectory);
     JSValueRef HomeDirectoryJSString = JSValueMakeString(Context, HomeDirectoryString);
     return HomeDirectoryJSString;
 };
 
-JSValueRef Classes::System::TempDirectory(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, TempDirectory){
     char* TempDirectory = getenv("TMPDIR");
     JSStringRef TempDirectoryString = JSStringCreateWithUTF8CString(TempDirectory);
     JSValueRef TempDirectoryJSString = JSValueMakeString(Context, TempDirectoryString);
     return TempDirectoryJSString;
 };
 
-JSValueRef Classes::System::CPUInfo(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::System, CPUInfo){
     uv_cpu_info_t *CPUInformation;
     int CPUInformationCount;
     int Result = uv_cpu_info(&CPUInformation, &CPUInformationCount);
@@ -156,7 +157,7 @@ JSValueRef Classes::System::CPUInfo(JSContextRef Context, JSObjectRef Function, 
     return CPUInformationArray;
 };
 
-JSValueRef Classes::System::NetworkInterfaces(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception){
+LISA_JS_FUNC(Classes::System, NetworkInterfaces){
     uv_interface_address_t* Interfaces;
     int InterfaceCount;
     int Result = uv_interface_addresses(&Interfaces, &InterfaceCount);
@@ -187,7 +188,7 @@ JSValueRef Classes::System::NetworkInterfaces(JSContextRef Context, JSObjectRef 
     return InterfaceArray;
 };
 
-JSValueRef Classes::System::GetHostname(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::System, GetHostname){
     char Hostname[256];
     int Result = gethostname(Hostname, sizeof(Hostname));
     if(Result != 0){
@@ -198,15 +199,15 @@ JSValueRef Classes::System::GetHostname(JSContextRef Context, JSObjectRef Functi
     return HostnameJSString;
 };
 
-JSValueRef Classes::System::GetPID(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::System, GetPID){
     return JSValueMakeNumber(Context, getpid());
 };
 
-JSValueRef Classes::System::GetPPID(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::System, GetPPID){
     return JSValueMakeNumber(Context, getppid());
 };
 
-JSValueRef Classes::System::Sleep(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::System, Sleep){
     if(ArgumentsLength < 1){
         return JSValueMakeUndefined(Context);
     }

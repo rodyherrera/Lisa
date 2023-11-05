@@ -2,6 +2,7 @@
 #include <thread>
 #include "CHTTPL.hpp"
 #include "CPP-HTTP-LIB.hpp"
+#include "../../Utilities/Runtime/Runtime.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
 #include "../../Utilities/HTTPServer/HTTPServer.hpp"
 
@@ -13,7 +14,7 @@ void Classes::CHTTPL::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, CHTTPLObject, "CreateServer", CHTTPL::CreateServer);  
 };
 
-JSValueRef Classes::CHTTPL::CreateServer(JSContextRef Context, JSObjectRef Function, JSObjectRef ThisObject, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception) {
+LISA_JS_FUNC(Classes::CHTTPL, CreateServer){
     httplib::Server* Server = new httplib::Server();
     HTTPServer::SetDefaultHeaders(*Server);
 
