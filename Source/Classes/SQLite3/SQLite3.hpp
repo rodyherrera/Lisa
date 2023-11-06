@@ -33,6 +33,7 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(ColumnType);
             JSC_FUNC_DEF(Randomness);
             JSC_FUNC_DEF(ColumnDouble);
+            JSC_FUNC_DEF(Remove);
             JSC_FUNC_DEF(OpenV2);
             JSC_FUNC_DEF(ColumnInt);
             JSC_FUNC_DEF(ColumnText);
@@ -42,6 +43,11 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(Restore);
             JSC_FUNC_DEF(PrepareV2);
             JSC_FUNC_DEF(PrepareV3);
+            JSC_FUNC_DEF(LoadExtension);
+            JSC_FUNC_DEF(EnableLoadExtension);
+            JSC_FUNC_DEF(Sleep);
+            JSC_FUNC_DEF(Shutdown);
+
     };
 };
 

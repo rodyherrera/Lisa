@@ -13,6 +13,12 @@ const std::string Lisa::Utilities::JSCWrapper::GetFormattedJSONFromJSValue(JSCon
     return FormattedJSONString;
 };
 
+void Lisa::Utilities::JSCWrapper::SetDoubleProperty(JSContextRef Context, JSObjectRef Object, const char* Key, const double Value){
+    JSStringRef KeyString = JSStringCreateWithUTF8CString(Key);
+    JSObjectSetProperty(Context, Object, KeyString, JSValueMakeNumber(Context, Value), kJSPropertyAttributeNone, NULL);
+    JSStringRelease(KeyString);
+};
+
 const double Lisa::Utilities::JSCWrapper::GetNumberFromJSValue(JSContextRef Context, JSValueRef Value){
     return JSValueToNumber(Context, Value, NULL);
 };

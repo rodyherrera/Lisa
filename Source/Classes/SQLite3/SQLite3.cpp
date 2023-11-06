@@ -16,6 +16,11 @@ unsigned int NextDatabaseId = 0;
 void Classes::SQLite3::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSObjectRef SQLite3Object = JSCWrapper::CreateObject(Context, GlobalObject, "SQLite3");
     JSCWrapper::CreateFunction(Context, SQLite3Object, "Open", SQLite3::Open);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "Remove", SQLite3::Remove);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "Shutdown", SQLite3::Shutdown);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "Sleep", SQLite3::Sleep);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "EnableLoadExtension", SQLite3::EnableLoadExtension);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "LoadExtension", SQLite3::LoadExtension);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "Close", SQLite3::Close);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "Version", SQLite3::Version);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "Randomness", SQLite3::Randomness);
@@ -44,7 +49,7 @@ void Classes::SQLite3::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, SQLite3Object, "ColumnInt", SQLite3::ColumnInt);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "ColumnText", SQLite3::ColumnText);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "ColumnBlob", SQLite3::ColumnBlob);
-    JSCWrapper::CreateFunction(Context, SQLite3Object, "OpenV2", SQLite3::ColumnBlob);
+    JSCWrapper::CreateFunction(Context, SQLite3Object, "OpenV2", SQLite3::OpenV2);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "ColumnValue", SQLite3::ColumnValue);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "Backup", SQLite3::Backup);
     JSCWrapper::CreateFunction(Context, SQLite3Object, "PrepareV2", SQLite3::PrepareV2);
@@ -123,6 +128,7 @@ JSC_FUNC(Classes::SQLite3, OpenV2){
 JSC_FUNC(Classes::SQLite3, Open){
     const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
     sqlite3 *Database;
+    // FIX RETURN VALUE !!!
     int Result = sqlite3_open(Path.data(), &Database);
     if(Result == SQLITE_OK){
         SQLiteDBMap[NextDatabaseId] = Database;
@@ -130,6 +136,11 @@ JSC_FUNC(Classes::SQLite3, Open){
         NextDatabaseId++;
     }
     return JSValueMakeNumber(Context, Result);
+};
+
+JSC_FUNC(Classes::SQLite3, Remove){
+    const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[0]);
+    return JSValueMakeNumber(Context, remove(Path.data()));
 };
 
 JSC_FUNC(Classes::SQLite3, Close){
@@ -155,6 +166,21 @@ JSC_FUNC(Classes::SQLite3, Execute){
     return JSValueMakeNumber(Context, Result);
 };
 
+JSC_FUNC(Classes::SQLite3, PrepareV2){
+    int DatabaseId = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
+    sqlite3 *Database = SQLiteDBMap[DatabaseId];
+    const std::string Query = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
+    sqlite3_stmt *Statement;
+    int Result = sqlite3_prepare_v2(Database, Query.data(), Query.size(), &Statement, NULL);
+    // FIX RETURN & V1 & V3
+    if(Result == SQLITE_OK){
+        JSObjectRef StatementObject = JSObjectMake(Context, nullptr, nullptr);
+        JSCWrapper::SetObjectInObject(Context, StatementObject, "Statement", Statement);
+        return StatementObject;
+    }
+    return JSValueMakeNumber(Context, Result);
+};
+
 JSC_FUNC(Classes::SQLite3, Prepare){
     int DatabaseId = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
     sqlite3 *Database = SQLiteDBMap[DatabaseId];
@@ -163,21 +189,7 @@ JSC_FUNC(Classes::SQLite3, Prepare){
     int Result = sqlite3_prepare(Database, Query.data(), Query.size(), &Statement, NULL);
     if(Result == SQLITE_OK){
         JSObjectRef StatementObject = JSObjectMake(Context, nullptr, nullptr);
-        JSObjectSetPrivate(StatementObject, Statement);
-        return StatementObject;
-    }
-    return JSValueMakeNumber(Context, Result);
-};
-
-JSC_FUNC(Classes::SQLite3, PrepareV2){
-    int DatabaseId = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
-    sqlite3 *Database = SQLiteDBMap[DatabaseId];
-    const std::string Query = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement;
-    int Result = sqlite3_prepare_v2(Database, Query.data(), Query.size(), &Statement, NULL);
-    if(Result == SQLITE_OK){
-        JSObjectRef StatementObject = JSObjectMake(Context, nullptr, nullptr);
-        JSObjectSetPrivate(StatementObject, Statement);
+        JSCWrapper::SetObjectInObject(Context, StatementObject, "Statement", Statement);
         return StatementObject;
     }
     return JSValueMakeNumber(Context, Result);
@@ -185,58 +197,28 @@ JSC_FUNC(Classes::SQLite3, PrepareV2){
 
 JSC_FUNC(Classes::SQLite3, Step){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
-
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_step(Statement);
-    if(Result == SQLITE_ROW){
-        std::vector<JSValueRef> ResultArray;
-        int ColumnCount = sqlite3_column_count(Statement);
-        JSValueRef ColumnValue; 
-        for(int Iterator = 0; Iterator < ColumnCount; Iterator++){
-            int Type = sqlite3_column_type(Statement, Iterator);
-            switch(Type){
-                case SQLITE_INTEGER:
-                    ColumnValue = JSValueMakeNumber(Context, sqlite3_column_int(Statement, Iterator));
-                    ResultArray.push_back(ColumnValue);
-                    break;
-                case SQLITE_FLOAT:
-                    ColumnValue = JSValueMakeNumber(Context, sqlite3_column_double(Statement, Iterator));
-                    ResultArray.push_back(ColumnValue);
-                    break;
-                case SQLITE_TEXT:
-                    ResultArray.push_back(JSCWrapper::CreateString(Context, (const char*)sqlite3_column_text(Statement, Iterator)));
-                    break;
-                case SQLITE_BLOB:
-                    ResultArray.push_back(JSCWrapper::CreateString(Context, (const char*)sqlite3_column_blob(Statement, Iterator)));
-                    break;
-                case SQLITE_NULL:
-                    ResultArray.push_back(JSValueMakeNull(Context));
-                    break;
-            }
-        }
-        JSObjectRef ResultArrayObject = JSObjectMakeArray(Context, ResultArray.size(), ResultArray.data(), nullptr);
-        return ResultArrayObject;
-    }
     return JSValueMakeNumber(Context, Result);
 };
 
 JSC_FUNC(Classes::SQLite3, Reset){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_reset(Statement);
     return JSValueMakeNumber(Context, Result);
 };
 
 JSC_FUNC(Classes::SQLite3, ClearBindings){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_clear_bindings(Statement);
     return JSValueMakeNumber(Context, Result);
 };
 
 JSC_FUNC(Classes::SQLite3, BindInt){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject); 
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement"); 
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
     int Value = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[2]);
     int Result = sqlite3_bind_int(Statement, Index, Value);
@@ -262,7 +244,7 @@ JSC_FUNC(Classes::SQLite3, CloseV2){
 
 JSC_FUNC(Classes::SQLite3, BindText){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
     const std::string Value = JSCWrapper::GetStringFromJSValue(Context, Arguments[2]);
     int Result = sqlite3_bind_text(Statement, Index, Value.data(), Value.size(), SQLITE_TRANSIENT);
@@ -271,7 +253,7 @@ JSC_FUNC(Classes::SQLite3, BindText){
 
 JSC_FUNC(Classes::SQLite3, BindBlob){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
     const std::string Value = JSCWrapper::GetStringFromJSValue(Context, Arguments[2]);
     int Result = sqlite3_bind_blob(Statement, Index, Value.data(), Value.size(), SQLITE_TRANSIENT);
@@ -280,7 +262,7 @@ JSC_FUNC(Classes::SQLite3, BindBlob){
 
 JSC_FUNC(Classes::SQLite3, BindDouble){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject); 
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement"); 
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
     double Value = JSCWrapper::GetNumberFromJSValue(Context, Arguments[2]);
     int Result = sqlite3_bind_double(Statement, Index, Value);
@@ -289,7 +271,7 @@ JSC_FUNC(Classes::SQLite3, BindDouble){
 
 JSC_FUNC(Classes::SQLite3, BindNull){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject); 
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement"); 
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
     int Result = sqlite3_bind_null(Statement, Index);
     return JSValueMakeNumber(Context, Result);
@@ -297,7 +279,7 @@ JSC_FUNC(Classes::SQLite3, BindNull){
 
 JSC_FUNC(Classes::SQLite3, BindParameterCount){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_bind_parameter_count(Statement);
     return JSValueMakeNumber(Context, Result);
 };
@@ -305,7 +287,7 @@ JSC_FUNC(Classes::SQLite3, BindParameterCount){
 JSC_FUNC(Classes::SQLite3, BindParameterIndex){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     const std::string Name = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject); 
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement"); 
     int Result = sqlite3_bind_parameter_index(Statement, Name.data());
     return JSValueMakeNumber(Context, Result);
 };
@@ -313,7 +295,7 @@ JSC_FUNC(Classes::SQLite3, BindParameterIndex){
 JSC_FUNC(Classes::SQLite3, BindParameterName){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     const char *Result = sqlite3_bind_parameter_name(Statement, Index);
     return JSCWrapper::CreateString(Context, Result);
 };
@@ -321,14 +303,14 @@ JSC_FUNC(Classes::SQLite3, BindParameterName){
 JSC_FUNC(Classes::SQLite3, BindParameterIndexFromName){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     const std::string Name = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_bind_parameter_index(Statement, Name.data());
     return JSValueMakeNumber(Context, Result);
 };
 
 JSC_FUNC(Classes::SQLite3, Finalize){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Result = sqlite3_finalize(Statement);
     return JSValueMakeNumber(Context, Result);
 };
@@ -347,56 +329,56 @@ JSC_FUNC(Classes::SQLite3, SourceID){
 
 JSC_FUNC(Classes::SQLite3, ColumnCount){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSValueMakeNumber(Context, sqlite3_column_count(Statement));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnName){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSCWrapper::CreateString(Context, sqlite3_column_name(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnType){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSValueMakeNumber(Context, sqlite3_column_type(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnInt){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSValueMakeNumber(Context, sqlite3_column_int(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnDouble){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSValueMakeNumber(Context, sqlite3_column_double(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnText){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSCWrapper::CreateString(Context, (const char*)sqlite3_column_text(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnBlob){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     return JSCWrapper::CreateString(Context, (const char*)sqlite3_column_blob(Statement, Index));
 };
 
 JSC_FUNC(Classes::SQLite3, ColumnValue){
     JSObjectRef StatementObject = JSValueToObject(Context, Arguments[0], nullptr);
     int Index = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
-    sqlite3_stmt *Statement = (sqlite3_stmt*)JSObjectGetPrivate(StatementObject);
+    sqlite3_stmt *Statement = (sqlite3_stmt*)JSCWrapper::GetObjectFromObject(Context, StatementObject, "Statement");
     int Type = sqlite3_column_type(Statement, Index);
     switch(Type){
         case SQLITE_INTEGER:
@@ -447,8 +429,36 @@ JSC_FUNC(Classes::SQLite3, PrepareV3){
     int Result = sqlite3_prepare_v3(Database, Query.data(), Query.size(), 0, &Statement, NULL);
     if(Result == SQLITE_OK){
         JSObjectRef StatementObject = JSObjectMake(Context, nullptr, nullptr);
-        JSObjectSetPrivate(StatementObject, Statement);
+        JSCWrapper::SetObjectInObject(Context, StatementObject, "Statement", Statement);
         return StatementObject;
     }
+    return JSValueMakeNumber(Context, Result);
+};
+
+JSC_FUNC(Classes::SQLite3, LoadExtension){
+    int DatabaseId = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
+    sqlite3 *Database = SQLiteDBMap[DatabaseId];
+    const std::string Path = JSCWrapper::GetStringFromJSValue(Context, Arguments[1]);
+    const std::string FunctionName = JSCWrapper::GetStringFromJSValue(Context, Arguments[2]);
+    int Result = sqlite3_load_extension(Database, Path.data(), FunctionName.data(), 0);
+    return JSValueMakeNumber(Context, Result);
+};
+
+JSC_FUNC(Classes::SQLite3, EnableLoadExtension){
+    int DatabaseId = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
+    sqlite3 *Database = SQLiteDBMap[DatabaseId];
+    int OnOff = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[1]);
+    int Result = sqlite3_enable_load_extension(Database, OnOff);
+    return JSValueMakeNumber(Context, Result);
+};
+
+JSC_FUNC(Classes::SQLite3, Sleep){
+    int Milliseconds = (int)JSCWrapper::GetNumberFromJSValue(Context, Arguments[0]);
+    sqlite3_sleep(Milliseconds);
+    return JSValueMakeUndefined(Context);
+};
+
+JSC_FUNC(Classes::SQLite3, Shutdown){
+    int Result = sqlite3_shutdown();
     return JSValueMakeNumber(Context, Result);
 };

@@ -6,6 +6,7 @@ namespace Lisa::Utilities::JSCWrapper{
             const char* FunctionName, JSObjectCallAsFunctionCallback FunctionCallback);
     JSObjectRef GetGlobalObject(JSContextRef Context, const char* Object);
     const std::string GetStringFromJSValue(JSContextRef Context, JSValueRef Value);
+    void SetDoubleProperty(JSContextRef Context, JSObjectRef Object, const char* Key, const double Value);
     const std::string GetKeyValueFromJSObjectAsString(JSContextRef Context, JSObjectRef Object, const char* Key);
     const int GetKeyValueFromJSObjectAsInteger(JSContextRef Context, JSObjectRef Object, const char* Key);
     JSValueRef CallCallbackFunctionFromJSObject(JSContextRef Context, JSObjectRef Object, const char* FunctionName, size_t ArgumentsLength, const JSValueRef Arguments[], JSValueRef* Exception);
