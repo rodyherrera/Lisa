@@ -1,5 +1,6 @@
 #include <iostream>
 #include <uv.h>
+#include "infoware/system.hpp"
 #include "System.hpp"
 #include "../../Utilities/Runtime/Runtime.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
@@ -21,6 +22,7 @@ void Classes::System::Init(JSContextRef Context, JSObjectRef GlobalObject){
     JSCWrapper::CreateFunction(Context, SystemObject, "HomeDirectory", System::HomeDirectory);
     JSCWrapper::CreateFunction(Context, SystemObject, "TempDirectory", System::TempDirectory);
     JSCWrapper::CreateFunction(Context, SystemObject, "CPUInfo", System::CPUInfo);
+    JSCWrapper::CreateFunction(Context, SystemObject, "Platform", System::Platform);
     JSCWrapper::CreateFunction(Context, SystemObject, "NetworkInterfaces", System::NetworkInterfaces);
     JSCWrapper::CreateFunction(Context, SystemObject, "GetHostname", System::GetHostname);
     JSCWrapper::CreateFunction(Context, SystemObject, "Sleep", System::Sleep);
@@ -215,3 +217,28 @@ JSC_FUNC(Classes::System, Sleep){
     uv_sleep(Milliseconds);
     return JSC_MAKE_UNDEFINED;
 };
+
+JSC_FUNC(Classes::System, Platform){
+    JSObjectRef PlatformObject = JSObjectMake(Context, nullptr, nullptr);
+    iware::system::OS_info_t OSInfo = iware::system::OS_info();
+    iware::system::kernel_info_t KernelInfo = iware::system::kernel_info();
+    std::string KernelName;
+    switch(KernelInfo.variant){
+        case iware::system::kernel_t::windows_nt:
+            KernelName = "Windows NT";
+            break;
+        case iware::system::kernel_t::linux:
+            KernelName = "Linux";
+            break;
+        case iware::system::kernel_t::darwin:
+            KernelName = "Darwin";
+            break;
+        case iware::system::kernel_t::unknown:
+            KernelName = "Unknown";
+            break;
+    }
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "Kernel", KernelName.data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "Name", OSInfo.name.data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "FullName", OSInfo.full_name.data());
+    return PlatformObject;
+}

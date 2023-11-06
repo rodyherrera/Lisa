@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++23 -Wall
-INCLUDES = -I/usr/include/webkitgtk-4.0 -I Dependencies/
-LDFLAGS = -ljavascriptcoregtk-4.0 -luv -lpthread -lstdc++fs 
+INCLUDES = -I/usr/include/webkitgtk-4.0 -I Dependencies/ -I Dependencies/infoware/include/
+LDFLAGS = -ljavascriptcoregtk-4.0 -luv -lpthread -lstdc++fs -LDependencies/infoware/build/lib/ -linfoware
 SOURCE_DIR = Source
 SOURCES := $(shell find $(SOURCE_DIR) -type f -name '*.cpp')
 OBJECTS = $(SOURCES:.cpp=.o)

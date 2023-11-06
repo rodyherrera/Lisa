@@ -11,6 +11,7 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(Uptime);
             JSC_FUNC_DEF(Uname);
             JSC_FUNC_DEF(Environ);
+            JSC_FUNC_DEF(Platform);
             JSC_FUNC_DEF(GetEnviron);
             JSC_FUNC_DEF(SetEnviron);
             JSC_FUNC_DEF(UnsetEnviron);
