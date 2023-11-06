@@ -5,6 +5,8 @@
 #include "Classes/Console/Console.hpp"
 #include "Classes/System/System.hpp"
 #include "Classes/CHTTPL/CHTTPL.hpp"
+#include "Classes/UUID/UUID.hpp"
+#include "Classes/SQLite3/SQLite3.hpp"
 #include "Classes/FileSystem/FileSystem.hpp"
 #include "Methods/SetTimeout/SetTimeout.hpp"
 #include "Methods/SetInterval/SetInterval.hpp"
@@ -33,6 +35,8 @@ int main(int argc, char const *argv[]){
         Lisa::Classes::System::Init(Context, GlobalObject);
         Lisa::Classes::CHTTPL::Init(Context, GlobalObject);
         Lisa::Classes::FileSystem::Init(Context, GlobalObject);
+        Lisa::Classes::UUID::Init(Context, GlobalObject);
+        Lisa::Classes::SQLite3::Init(Context, GlobalObject);
 
         JSStringRef SetTimeoutName = JSStringCreateWithUTF8CString("SetTimeout");
         JSObjectRef SetTimeoutFunction = JSObjectMakeFunctionWithCallback(Context, SetTimeoutName, Lisa::Methods::SetTimeout);
