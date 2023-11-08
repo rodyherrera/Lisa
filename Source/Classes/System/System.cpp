@@ -1,6 +1,6 @@
 #include <iostream>
 #include <uv.h>
-#include "infoware/system.hpp"
+#include <Poco/Environment.h>
 #include "System.hpp"
 #include "../../Utilities/Runtime/Runtime.hpp"
 #include "../../Utilities/JSCWrapper/JSCWrapper.hpp"
@@ -220,25 +220,10 @@ JSC_FUNC(Classes::System, Sleep){
 
 JSC_FUNC(Classes::System, Platform){
     JSObjectRef PlatformObject = JSObjectMake(Context, nullptr, nullptr);
-    iware::system::OS_info_t OSInfo = iware::system::OS_info();
-    iware::system::kernel_info_t KernelInfo = iware::system::kernel_info();
-    std::string KernelName;
-    switch(KernelInfo.variant){
-        case iware::system::kernel_t::windows_nt:
-            KernelName = "Windows NT";
-            break;
-        case iware::system::kernel_t::linux:
-            KernelName = "Linux";
-            break;
-        case iware::system::kernel_t::darwin:
-            KernelName = "Darwin";
-            break;
-        case iware::system::kernel_t::unknown:
-            KernelName = "Unknown";
-            break;
-    }
-    JSCWrapper::SetStringProperty(Context, PlatformObject, "Kernel", KernelName.data());
-    JSCWrapper::SetStringProperty(Context, PlatformObject, "Name", OSInfo.name.data());
-    JSCWrapper::SetStringProperty(Context, PlatformObject, "FullName", OSInfo.full_name.data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "Name", Poco::Environment::osName().data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "Version", Poco::Environment::osVersion().data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "Architecture", Poco::Environment::osArchitecture().data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "NodeName", Poco::Environment::nodeName().data());
+    JSCWrapper::SetStringProperty(Context, PlatformObject, "NodeID", Poco::Environment::nodeId().data());
     return PlatformObject;
 }

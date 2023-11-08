@@ -5,6 +5,7 @@
 #include "Classes/Console/Console.hpp"
 #include "Classes/System/System.hpp"
 #include "Classes/CHTTPL/CHTTPL.hpp"
+#include "Classes/Network/Network.hpp"
 #include "Classes/UUID/UUID.hpp"
 #include "Classes/SQLite3/SQLite3.hpp"
 #include "Classes/FileSystem/FileSystem.hpp"
@@ -37,6 +38,7 @@ int main(int argc, char const *argv[]){
         Lisa::Classes::FileSystem::Init(Context, GlobalObject);
         Lisa::Classes::UUID::Init(Context, GlobalObject);
         Lisa::Classes::SQLite3::Init(Context, GlobalObject);
+        Lisa::Classes::Network::Init(Context, GlobalObject);
 
         JSStringRef SetTimeoutName = JSStringCreateWithUTF8CString("SetTimeout");
         JSObjectRef SetTimeoutFunction = JSObjectMakeFunctionWithCallback(Context, SetTimeoutName, Lisa::Methods::SetTimeout);
