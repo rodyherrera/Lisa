@@ -69,6 +69,11 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "semaphore": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "codecvt": "cpp",
+        "charconv": "cpp",
+        "future": "cpp",
+        "cerrno": "cpp",
+        "climits": "cpp"
     }
 }

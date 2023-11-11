@@ -20,6 +20,7 @@ namespace Lisa::Classes{
             JSC_FUNC_DEF(IsSiteLocal);
             JSC_FUNC_DEF(IsIPv4Compatible);
             JSC_FUNC_DEF(IsIPv4Mapped);
+            JSC_FUNC_DEF(WebSocketServer);
     };
 };
 
