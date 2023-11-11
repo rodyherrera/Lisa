@@ -1,7 +1,5 @@
-const SocketServer = Network.WebSocketServer();
-
-SocketServer.AddServerName('TestServer');
-
-SocketServer.Listen('0.0.0.0', 8000, () => {
-    Console.Log('Server is listening on port 8000');
-});
+// module1.js
+export const myFunction = () => {
+    console.log('Hello from module1');
+  };
+  

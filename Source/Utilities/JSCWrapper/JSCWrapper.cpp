@@ -79,6 +79,13 @@ const int Lisa::Utilities::JSCWrapper::GetKeyValueFromJSObjectAsInteger(JSContex
     return JSValueToNumber(Context, Value, NULL);
 };
 
+const bool Lisa::Utilities::JSCWrapper::GetKeyValueFromJSObjectAsBoolean(JSContextRef Context, JSObjectRef Object, const char* Key){
+    JSStringRef KeyString = JSStringCreateWithUTF8CString(Key);
+    JSValueRef Value = JSObjectGetProperty(Context, Object, KeyString, NULL);
+    JSStringRelease(KeyString);
+    return JSValueToBoolean(Context, Value);
+};
+
 const std::string Lisa::Utilities::JSCWrapper::GetStringFromJSValue(JSContextRef Context, JSValueRef Value){
     JSStringRef StringRef = JSValueToStringCopy(Context, Value, NULL);
     size_t StringLength = JSStringGetMaximumUTF8CStringSize(StringRef);

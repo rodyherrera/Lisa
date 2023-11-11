@@ -5,9 +5,7 @@ CXXFLAGS = -std=c++23 -Wall -shared
 # Include directories
 INCLUDES = -I/usr/include/webkitgtk-4.0 \
            -I Dependencies/ \
-           -I Dependencies/sqlite3pp/headeronly_src/ \
-           -I Dependencies/uWebSockets/src/ \
-           -I Dependencies/uWebSockets/uSockets/src/ 
+           -I Dependencies/sqlite3pp/headeronly_src/ 
 
 # Linker flags
 LDFLAGS = -ljavascriptcoregtk-4.0 \
@@ -18,9 +16,7 @@ LDFLAGS = -ljavascriptcoregtk-4.0 \
           -lsqlite3 \
           -lPocoFoundation \
           -lPocoNet \
-          -lPocoNetSSL \
-          -lz \
-          -L Dependencies/uWebSockets/uSockets/ -l:uSockets.a
+          -lPocoNetSSL 
 
 # Source code directory
 SOURCE_DIR = Source
