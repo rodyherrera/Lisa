@@ -4,8 +4,7 @@ CXXFLAGS = -std=c++23 -Wall -shared
 
 # Include directories
 INCLUDES = -I/usr/include/webkitgtk-4.0 \
-           -I Dependencies/ \
-           -I Dependencies/sqlite3pp/headeronly_src/ 
+           -I Dependencies/
 
 # Linker flags
 LDFLAGS = -ljavascriptcoregtk-4.0 \
@@ -27,11 +26,26 @@ SOURCES := $(shell find $(SOURCE_DIR) -type f -name '*.cpp')
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
 
+IS_PATH_ADDED = $(shell grep -c "$(PWD)" ~/.bashrc)
+
 # Executable name
 EXECUTABLE = Lisa
 
-# Build the executable
-all: $(EXECUTABLE)
+all: install_dependencies add_path build
+
+install_dependencies:
+	sudo apt-get install libwebkit2gtk-4.0-dev libboost-all-dev libsqlite3-dev libpoco-dev
+
+build: $(EXECUTABLE)
+
+add_path:
+	if [ $(IS_PATH_ADDED) -eq 0 ]; then \
+        echo "export PATH=$(PWD):$$PATH" >> ~/.bashrc; \
+        echo "Path added to the firmament: $(PWD)"; \
+        sh ~/.bashrc; \
+	else \
+		echo "Path already in the firmament: $(PWD)"; \
+	fi
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
