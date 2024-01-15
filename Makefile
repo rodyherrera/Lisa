@@ -1,6 +1,18 @@
+# ***
+# * Copyright (C) Rodolfo Herrera Hernandez. All rights reserved.
+# * Licensed under the MIT license. See LICENSE file in the project root 
+# * for full license information.
+# *
+# * =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# *
+# * For related information - https://github.com/rodyherrera/Lisa/
+# *
+# * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# ***
+
 # Compiler
 CXX = g++
-CXXFLAGS = -std=c++23 -Wall -shared
+CXXFLAGS = -std=c++2a -Wall -shared
 
 # Include directories
 INCLUDES = -I/usr/include/webkitgtk-4.0 \
@@ -34,7 +46,7 @@ EXECUTABLE = Lisa
 all: install_dependencies add_path build
 
 install_dependencies:
-	sudo apt-get install libwebkit2gtk-4.0-dev libboost-all-dev libsqlite3-dev libpoco-dev
+	sudo apt-get install libwebkit2gtk-4.0-dev libboost-all-dev libsqlite3-dev libpoco-dev libuv1-dev
 
 build: $(EXECUTABLE)
 
