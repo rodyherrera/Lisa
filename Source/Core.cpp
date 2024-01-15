@@ -16,7 +16,6 @@
 #include "Utilities/Runtime/Runtime.hpp"
 #include "Classes/Console/Console.hpp"
 #include "Classes/System/System.hpp"
-#include "Classes/CHTTPL/CHTTPL.hpp"
 #include "Classes/Network/Network.hpp"
 #include "Classes/UUID/UUID.hpp"
 #include "Classes/SQLite3/SQLite3.hpp"
@@ -46,7 +45,6 @@ int main(int argc, char const *argv[]){
 
         Lisa::Classes::Console::Init(Context, GlobalObject);
         Lisa::Classes::System::Init(Context, GlobalObject);
-        Lisa::Classes::CHTTPL::Init(Context, GlobalObject);
         Lisa::Classes::FileSystem::Init(Context, GlobalObject);
         Lisa::Classes::UUID::Init(Context, GlobalObject);
         Lisa::Classes::SQLite3::Init(Context, GlobalObject);
